@@ -1,14 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <ctime>
+#include <stdlib.h>
 #include "Sudoku.h"
 using namespace std;
 //----------------------------------------
-
-
-
-
-
 int Sudoku::Ans = 0;
 int Sudoku::cul = 0;
 int Sudoku::map_tmp[81];
@@ -20,7 +17,6 @@ Sudoku::Sudoku()
 	{
 		map[i] = 0;
 	}
-		
 }
 //----------------------------------------
 Sudoku::Sudoku(vector<int> init_map, int A)
@@ -77,8 +73,6 @@ void Sudoku::readIn()//fun.2
 		map[i] = sudoku_in[i];
 	}
 }
-
-
 //----------------------------------------
 void Sudoku::solve()//fun.3
 {
@@ -114,7 +108,6 @@ void Sudoku::solve()//fun.3
 			}
 		}
 	}
-	
 	for(int i=0;i<sudokuSize;++i)
 	{
 		if(!map[i] && count[i]==8)
@@ -162,17 +155,13 @@ void Sudoku::solve()//fun.3
 		{
 			for(int i=0;i<sudokuSize;++i)
 				map_tmp[i] = map[i];
-		}
-			
+		}	
 		if(Ans>1)
 		{
 			cout<<"2"<<endl;
 		    exit(1);
 		}
-			
-		
 	}
-		
 	else
 	{
 		int Max,i_Max;
@@ -186,7 +175,6 @@ void Sudoku::solve()//fun.3
 				i_Max = i;
 			}
 		}
-		
 		for(int j=0;j<Size;++j)
 		{
 			if(!tag[i_Max][j])
@@ -224,23 +212,7 @@ void Sudoku::solve()//fun.3
 				cout << endl;
 			}
 		}
-		
 	}
-
-	
-	cout << endl;
-}
-
-//----------------------------------------
-void Sudoku::setMap(int set_map[])
-{
-	for(int i=0; i<sudokuSize; ++i)
-		map[i] = set_map[i];
-}
-//----------------------------------------
-int Sudoku::getElement(int index)
-{
-	return map[index];
 }
 //----------------------------------------
 vector<int> Sudoku::getBoard()
@@ -263,63 +235,266 @@ void Sudoku::setAns(int A)
 	Ans = A;
 }
 
-
-
-
-
-
-
-
 //----------------------------------------
-bool Sudoku::checkUnity(int arr[])
+//----------------------------------------
+void Sudoku::transform()
 {
-	int arr_unity[9]; // counters
-	for(int i=0; i<9; ++i)
-		arr_unity[i] = 0; // initialize
-	for(int i=0; i<9; ++i)
-		++arr_unity[arr[i]-1]; // count
-	for(int i=0; i<9; ++i)
-		if(arr_unity[i] != 1) // all element
-	        return false; // must be 1
-	return true;
+	readIn();
+	change();
+	printOut();
 }
 //----------------------------------------
-bool Sudoku::isCorrect()
+void Sudoku::change()
 {
-	bool check_result;
-	int check_arr[9];
-	int location;
-	for(int i=0; i<81; i+=9) // check rows
+	srand(time(NULL));
+	changeNum(rand()%Size+1,rand()%Size+1);
+	changeRow(rand()%3,rand()%3);
+	changeCol(rand()%3,rand()%3);
+	rotate(rand()%101);
+	flip(rand()%2);
+}
+//----------------------------------------
+void Sudoku::changeNum(int a, int b)
+{	
+	for(int i=0; i<sudokuSize; ++i)
 	{
-		for(int j=0; j<9; ++j)
-			check_arr[j] = map[i+j];
-		check_result = checkUnity(check_arr);
-		if(check_result == false)
-			return false;
+		map_tmp[i] = map[i];
 	}
-	for(int i=0; i<9; ++i) // check columns
+	for(int i=0; i<sudokuSize; ++i)
 	{
-		for(int j=0; j<9; ++j)
-			check_arr[j] = map[i+9*j];
-		check_result = checkUnity(check_arr);
-		if(check_result == false)
-			return false;
+		if (map[i] == a)
+			map[i] = b;
 	}
-	for(int i=0; i<9; ++i) // check cells
+	for(int i=0; i<sudokuSize; ++i)
 	{
-		for(int j=0; j<9; ++j)
+		if (map_tmp[i] == b)
+			map[i] = a;
+	}
+}
+//----------------------------------------
+void Sudoku::changeRow(int a, int b)
+{
+	for(int i=0; i<sudokuSize; ++i)
+	{
+		map_tmp[i] = map[i];
+	}
+    if ((a==0 && b==1)||(a==1 && b==0))
+	{
+		for(int i=0; i<9;i++)
 		{
-			location = 27*(i/3) + 3*(i%3)+9*(j/3) + (j%3);
-			check_arr[j] = map[location];
+			map[i+27] = map[i];
+			map[i+36] = map[i+9];
+			map[i+45] = map[i+18];
 		}
-		check_result = checkUnity(check_arr);
-		if(check_result == false)
-			return false;
+		for(int i=0; i<9;i++)
+		{
+			map[i] = map_tmp[i+27];
+			map[i+9] = map_tmp[i+36];
+			map[i+18] = map_tmp[i+45];
+		}
 	}
-	return true;
+	if ((a==0 && b==2)||(a==2 && b==0))
+	{
+		for(int i=0; i<9;i++)
+		{
+			map[i+54] = map[i];
+			map[i+63] = map[i+9];
+			map[i+72] = map[i+18];
+		}
+		for(int i=0; i<9;i++)
+		{
+			map[i] = map_tmp[i+54];
+			map[i+9] = map_tmp[i+63];
+			map[i+18] = map_tmp[i+72];
+		}
+	}
+	if ((a==1 && b==2)||(a==2 && b==1))
+	{
+		for(int i=0; i<9;i++)
+		{
+			map[i+54] = map[i+27];
+			map[i+63] = map[i+36];
+			map[i+72] = map[i+45];
+		}
+		for(int i=0; i<9;i++)
+		{
+			map[i+27] = map_tmp[i+54];
+			map[i+36] = map_tmp[i+63];
+			map[i+45] = map_tmp[i+72];
+		}
+	}
+}
+//----------------------------------------
+void Sudoku::changeCol(int a, int b)
+{
+	for(int i=0; i<sudokuSize; ++i)
+	{
+		map_tmp[i] = map[i];	
+	}
+	if ((a==0 && b==1)||(a==1 && b==0))
+	{
+		for(int i=0; i<9;i++)
+		{
+			map[9*i+3] = map[9*i];
+			map[9*i+4] = map[9*i+1];
+			map[9*i+5] = map[9*i+2];
+		}
+		for(int i=0; i<9;i++)
+		{
+			map[9*i] = map_tmp[9*i+3];
+			map[9*i+1] = map_tmp[9*i+4];
+			map[9*i+2] = map_tmp[9*i+5];
+		}
+	}
+	if ((a==0 && b==2)||(a==2 && b==0))
+	{
+		for(int i=0; i<9;i++)
+		{
+			map[9*i+6] = map[9*i];
+			map[9*i+7] = map[9*i+1];
+			map[9*i+8] = map[9*i+2];
+		}
+		for(int i=0; i<9;i++)
+		{
+			map[9*i] = map_tmp[9*i+6];
+			map[9*i+1] = map_tmp[9*i+7];
+			map[9*i+2] = map_tmp[9*i+8];
+		}
+	}
+	if ((a==1 && b==2)||(a==2 && b==1))
+	{
+		for(int i=0; i<9;i++)
+		{
+			map[9*i+6] = map[9*i+3];
+			map[9*i+7] = map[9*i+4];
+			map[9*i+8] = map[9*i+5];
+		}
+		for(int i=0; i<9;i++)
+		{
+			map[9*i+3] = map_tmp[9*i+6];
+			map[9*i+4] = map_tmp[9*i+7];
+			map[9*i+5] = map_tmp[9*i+8];
+		}
+	}
+}
+//----------------------------------------
+void Sudoku::rotate(int n)
+{
+	if(n==0 || n%4==0)
+	{
+	
+	}
+	else
+	{
+		int k=1;
+		while(k<=n)
+		{
+			for(int i=0; i<sudokuSize;i++)
+			{
+				map_tmp[i] = map[i];
+				map[i] = 0;
+			}
+			for(int i=0; i<Size;i++)
+			{
+				for(int j=8; j>=0;j--)
+					map[9*i+j] = map_tmp[i+(8-j)*9];
+			}
+			k++;
+		}
+	}
+			
+}
+//----------------------------------------
+void Sudoku::flip(int n)
+{
+	for(int i=0; i<sudokuSize;i++)
+	{
+		map_tmp[i] = map[i];
+	}
+	if (n==1)
+	{
+		for(int i=0; i<Size;i++)
+		{
+			map[9*i+8] = map[9*i];
+			map[9*i+7] = map[9*i+1];
+			map[9*i+6] = map[9*i+2];
+			map[9*i+5] = map[9*i+3];
+		}
+		for(int i=0; i<Size;i++)
+		{
+			map[9*i] = map_tmp[9*i+8];
+			map[9*i+1] = map_tmp[9*i+7];
+			map[9*i+2] = map_tmp[9*i+6];
+			map[9*i+3] = map_tmp[9*i+5];
+		}
+	}
+	else // n==0
+	{
+		for(int i=0; i<Size;i++)
+		{
+			map[i] = map[i+9*8];
+			map[i+9] = map[i+9*7];
+			map[i+9*2] = map[i+9*6];
+			map[i+9*3] = map[i+9*5];
+		}
+		for(int i=0; i<Size;i++)
+		{
+			map[i+9*8] = map_tmp[i];
+			map[i+9*7] = map_tmp[i+9];
+			map[i+9*6] = map_tmp[i+9*2];
+			map[i+9*5] = map_tmp[i+9*3];
+		}
+	}
+}
+//--------------------------------------------
+void Sudoku::printOut()
+{
+	for(int i=0; i<sudokuSize; ++i)
+	{			
+		if(map[i]==0)
+		{
+			cout <<" ";
+		}
+		else{
+			cout << map[i] << ' ';
+		}
+		if ((i+1)%9 ==0)
+		{
+			cout << endl;
+		}
+	}
 }
 
 
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -11,5 +11,6 @@ int main()
 	su.giveQuestion();
 	su.readIn();
 	su.solve();
+	su.change();
 	return 0;	
 }

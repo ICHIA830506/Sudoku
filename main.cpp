@@ -6,11 +6,11 @@ using namespace std;
 
 int main()
 {	
-    int A = 0;
-    Sudoku su;
-	su.giveQuestion();
-	su.readIn();
-	su.solve();
-	su.change();
+    Sudoku ss;
+	ss.giveQuestion();
+	ss.readIn();
+	ss.solve();
+	ss.transform();
+	
 	return 0;	
 }

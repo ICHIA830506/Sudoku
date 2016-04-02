@@ -7,28 +7,33 @@
 using namespace std;
 //----------------------------------------
 int Sudoku::Ans = 0;
+int Sudoku::A = 0;
 int Sudoku::cul = 0;
 int Sudoku::map_tmp[81];
 
 //----------------------------------------
 Sudoku::Sudoku()
 {
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{
 		map[i] = 0;
+		count[i]=0;
+		for(int j=0;j<Size;j++)
+			tag[i][j] = 0;
 	}
+	Found = 0;
 }
 //----------------------------------------
 Sudoku::Sudoku(vector<int> init_map, int A)
 {
 	cul++;
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 		map[i] = init_map[i];
 	//
-	for(int i=0;i<sudokuSize;++i)
+	for(int i=0;i<sudokuSize;i++)
 	{
 		count[i]=0;
-		for(int j=0;j<Size;++j)
+		for(int j=0;j<Size;j++)
 			tag[i][j] = 0;
 	}
 	Found = 0;
@@ -43,16 +48,17 @@ void Sudoku::giveQuestion()//fun.1
 		cerr<<"Failed opening"<<endl;
 		exit(1);
 	}
-	out<<"0 3 0 8 4 2 0 6 1"<<endl
-	   <<"0 4 2 6 1 5 3 0 0"<<endl
-	   <<"0 0 6 7 9 3 8 0 4"<<endl
-	   <<"7 2 5 4 3 0 0 0 9"<<endl
-	   <<"6 0 0 1 0 7 0 3 2"<<endl
-	   <<"0 1 4 0 2 8 7 5 0"<<endl
-	   <<"2 7 3 5 0 1 9 0 8"<<endl
-	   <<"4 6 0 0 8 0 0 0 5"<<endl
-	   <<"0 8 0 2 0 4 6 1 0"<<endl;
+	out<<"0 6 7 0 0 4 3 2 0"<<endl
+	   <<"1 0 0 2 0 0 9 0 0"<<endl
+	   <<"2 4 0 0 0 0 8 1 7"<<endl
+	   <<"0 0 0 0 0 3 0 0 0"<<endl
+	   <<"3 0 0 0 0 0 5 0 1"<<endl
+	   <<"8 0 2 9 5 0 4 7 0"<<endl
+	   <<"7 0 6 0 4 0 1 3 9"<<endl
+	   <<"0 3 9 0 0 0 0 8 4"<<endl
+	   <<"0 8 1 0 6 9 7 0 2"<<endl;
 }
+
 //----------------------------------------
 void Sudoku::readIn()//fun.2
 {
@@ -64,11 +70,11 @@ void Sudoku::readIn()//fun.2
 		cerr<<"Failed opening"<<endl;
 		exit(1);
 	}
-	for(int i=0;i<sudokuSize;++i)
+	for(int i=0;i<sudokuSize;i++)
 	{
 		in>>sudoku_in[i];
 	}
-	for(int i=0;i<sudokuSize;++i)
+	for(int i=0;i<sudokuSize;i++)
 	{
 		map[i] = sudoku_in[i];
 	}
@@ -79,13 +85,28 @@ void Sudoku::solve()//fun.3
 	int DisNum_row, DisNum_column, DisNum_cell;
 	int Blank_row, Blank_column, Blank_cell;
     int	BlankAddress_row, BlankAddress_column, BlankAddress_cell;
-
-    for(int i=0;i<sudokuSize;++i)
+	
+	if(checkZero() == true)
+	{
+		cout << "2"<<endl;
+		exit(1);
+	}
+	else
+	{
+	
+	if(isSolvable() == false)
+	{
+		cout << getAns() <<endl;
+		exit(1);
+	}
+	else
+	{
+    for(int i=0;i<sudokuSize;i++)
 	{
 		if(map[i])
 			Found++;
 		else{
-			for(int j=0;j<Size;++j)
+			for(int j=0;j<Size;j++)
 			{
 				DisNum_row = map[(i/Size)*Size+j];
 				if(DisNum_row && !tag[i][DisNum_row-1])
@@ -108,23 +129,25 @@ void Sudoku::solve()//fun.3
 			}
 		}
 	}
-	for(int i=0;i<sudokuSize;++i)
+	
+	for(int i=0;i<sudokuSize;i++)
 	{
 		if(!map[i] && count[i]==8)
 		{
 			count[i] = 0;
 			Found++;
-			for(int j=0;j<Size;++j)
+			for(int j=0;j<Size;j++)
 			{
 				if(!tag[i][j])
 				{
 					map[i] = j+1;
-					for(int k=0;k<Size;++k)
+					for(int k=0;k<Size;k++)
 					{
 						Blank_row = map[(i/Size)*Size+k];
 						BlankAddress_row = (i/Size)*Size+k;
 						if(!Blank_row && !tag[BlankAddress_row][j])
 						{
+							
 							count[BlankAddress_row]++;
 							tag[BlankAddress_row][j] = true;
 						}
@@ -132,6 +155,7 @@ void Sudoku::solve()//fun.3
 						BlankAddress_column = k*Size+i%Size;
 						if(!Blank_column && !tag[BlankAddress_column][j])
 						{
+							
 							count[BlankAddress_column]++;
 							tag[BlankAddress_column][j] = true;
 						}
@@ -139,6 +163,7 @@ void Sudoku::solve()//fun.3
 						BlankAddress_cell = ((i/(Size*3))*3+k/3)*Size+((i%Size)/3)*3+k%3;
 						if(!Blank_cell && !tag[BlankAddress_cell][j])
 						{
+							
 							count[BlankAddress_cell]++;
 							tag[BlankAddress_cell][j] = true;
 						}
@@ -146,14 +171,15 @@ void Sudoku::solve()//fun.3
 				}
 			}
 			i = -1;	
-		}  	
+		}
 	}
+	
 	if(Found == 81)
 	{
 		setAns(Ans+1);
 		if(Ans==1)
 		{
-			for(int i=0;i<sudokuSize;++i)
+			for(int i=0;i<sudokuSize;i++)
 				map_tmp[i] = map[i];
 		}	
 		if(Ans>1)
@@ -167,7 +193,7 @@ void Sudoku::solve()//fun.3
 		int Max,i_Max;
 		Max = 0;
 		i_Max = -1;
-		for(int i=0;i<sudokuSize;++i)
+		for(int i=0;i<sudokuSize;i++)
 		{
 			if(count[i]>Max)
 			{
@@ -175,7 +201,7 @@ void Sudoku::solve()//fun.3
 				i_Max = i;
 			}
 		}
-		for(int j=0;j<Size;++j)
+		for(int j=0;j<Size;j++)
 		{
 			if(!tag[i_Max][j])
 			{
@@ -187,7 +213,7 @@ void Sudoku::solve()//fun.3
 			}
 		}
 	}
-	//cout << cul <<"CUL"<<endl;
+	
 	if (cul==0 && Ans ==0)
 	{
 		cout << getAns() <<endl;
@@ -196,13 +222,13 @@ void Sudoku::solve()//fun.3
 	if (cul==0 && Ans ==1)
 	{
 		cout << getAns() <<endl;
-		for(int j=0;j<sudokuSize;++j)
+		for(int j=0;j<sudokuSize;j++)
 				map[j] = map_tmp[j];
-		for(int i=0; i<sudokuSize; ++i)
+		for(int i=0; i<sudokuSize; i++)
 		{			
 			if(map[i]==0)
 			{
-				cout <<" ";
+				cout <<" "<< ' ';
 			}
 			else{
 				cout << map[i] << ' ';
@@ -212,13 +238,16 @@ void Sudoku::solve()//fun.3
 				cout << endl;
 			}
 		}
+		cout << endl;
+	}
+	}
 	}
 }
 //----------------------------------------
 vector<int> Sudoku::getBoard()
 {
 	vector<int> out_map(sudokuSize);
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{
 		out_map[i] = map[i];
 	}
@@ -234,7 +263,78 @@ void Sudoku::setAns(int A)
 {
 	Ans = A;
 }
+//----------------------------------------
+bool Sudoku::checkZero()
+{
+	int zero = 0;
+	for(int i=0; i<sudokuSize; i++)
+	{
+		if(map[i] == 0)
+			++zero;
+		else
+			return false;
+	}
+	if(zero == 81)
+		return true;
+}
+//----------------------------------------
+bool Sudoku::checkRepeat(int arr[])
+{
+	int arr_repeat[Size]; // counters
+	
+	for(int i=0; i<Size; i++)
+		arr_repeat[i] = 0; // initialize
+	
+	for(int i=0; i<Size; i++)
+	{
+		if (arr[i] != 0)
+			++arr_repeat[arr[i]-1]; // count
+	}
+	for(int i=0; i<Size; i++)
+	{
+		if(arr_repeat[i] > 1) // all element
+		return false; // must <= 1	
+	}
+	return true;
+}
+//----------------------------------------
+bool Sudoku::isSolvable()
+{
+	bool check_result;
+	int check_arr[Size];
+	int location;
+	
+	for(int i=0; i<sudokuSize; i+=9) // check rows
+	{
+		for(int j=0; j<Size; j++)
+			check_arr[j] = map[i+j];
+		check_result = checkRepeat(check_arr);
+		if(check_result == false)
+			return false;
+	}
+	
+	for(int i=0; i<Size; i++) // check columns
+	{
+		for(int j=0; j<Size; j++)
+			check_arr[j] = map[i+9*j];
+		check_result = checkRepeat(check_arr);
+		if(check_result == false)
+			return false;
+	}
 
+	for(int i=0; i<Size; i++) // check cells
+	{
+		for(int j=0; j<Size; j++)
+		{
+			location = 27*(i/3) + 3*(i%3)+9*(j/3) + (j%3);
+			check_arr[j] = map[location];
+		}
+		check_result =checkRepeat(check_arr);
+		if(check_result == false)
+			return false;
+	}
+	return true;
+}
 //----------------------------------------
 //----------------------------------------
 void Sudoku::transform()
@@ -256,16 +356,16 @@ void Sudoku::change()
 //----------------------------------------
 void Sudoku::changeNum(int a, int b)
 {	
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{
 		map_tmp[i] = map[i];
 	}
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{
 		if (map[i] == a)
 			map[i] = b;
 	}
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{
 		if (map_tmp[i] == b)
 			map[i] = a;
@@ -274,7 +374,7 @@ void Sudoku::changeNum(int a, int b)
 //----------------------------------------
 void Sudoku::changeRow(int a, int b)
 {
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{
 		map_tmp[i] = map[i];
 	}
@@ -327,7 +427,7 @@ void Sudoku::changeRow(int a, int b)
 //----------------------------------------
 void Sudoku::changeCol(int a, int b)
 {
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{
 		map_tmp[i] = map[i];	
 	}
@@ -449,11 +549,11 @@ void Sudoku::flip(int n)
 //--------------------------------------------
 void Sudoku::printOut()
 {
-	for(int i=0; i<sudokuSize; ++i)
+	for(int i=0; i<sudokuSize; i++)
 	{			
 		if(map[i]==0)
 		{
-			cout <<" ";
+			cout <<"0"<< ' ';
 		}
 		else{
 			cout << map[i] << ' ';
